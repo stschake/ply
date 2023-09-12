@@ -386,6 +386,7 @@ void ksyms_free(struct ksyms *ks)
 
 	munmap(ks->cache, size);
 	close(ks->cache_fd);
+	free(ks);
 }
 
 struct ksyms *ksyms_new(void)

@@ -285,6 +285,12 @@ int main(int argc, char **argv)
 	if (ret.val)
 		goto err;
 
+	/* none were defined or they failed to probe */
+	if (!ply->probes) {
+		_e("no probes defined\n");
+		exit(1);
+	}
+
 	ret.val = ply_compile(ply);
 
 	if (f_dump)

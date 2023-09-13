@@ -26,6 +26,7 @@ libply_la_SOURCES     = 	\
 	aux/printxf.c		\
 	aux/syscall.c		\
 	aux/utils.c		\
+	aux/elfsyms.c	\
 	\
 	built-in/aggregation.c	\
 	built-in/built-in.c	\

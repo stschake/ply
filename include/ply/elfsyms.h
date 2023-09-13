@@ -16,6 +16,7 @@ struct elfsyms {
     int fd;
     void *data;
     off_t size;
+    char *build_id;
 
     struct symbol *symbols;
     size_t nsymbols;

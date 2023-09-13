@@ -46,6 +46,9 @@ libply_la_SOURCES     = 	\
 	provider/tracepoint.c	\
 	provider/xprobe.c	\
 	provider/xprobe.h	\
+	provider/uprobe.c	\
+	provider/uprobe.h	\
+	provider/uretprobe.c	\
 	\
 	compile.c		\
 	func.c			\

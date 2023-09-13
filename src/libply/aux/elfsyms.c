@@ -18,10 +18,12 @@
 #if ULONG_MAX == 0xffffffff
 typedef Elf32_Ehdr Ehdr;
 typedef Elf32_Shdr Shdr;
+typedef Elf32_Nhdr Nhdr;
 typedef Elf32_Sym Sym;
 #else
 typedef Elf64_Ehdr Ehdr;
 typedef Elf64_Shdr Shdr;
+typedef Elf64_Nhdr Nhdr;
 typedef Elf64_Sym Sym;
 #endif
 
@@ -41,6 +43,22 @@ const struct symbol *elfsyms_lookup(struct elfsyms* es, const char *name)
         return NULL;
     
     return bsearch(&key, es->symbols, es->nsymbols, sizeof(struct symbol), symbol_cmp);
+}
+
+static void read_build_id(struct elfsyms *es, const Shdr *note)
+{
+    const Nhdr *data = es->data + note->sh_offset;
+    const uint8_t *id;
+    size_t i;
+
+    if (data->n_descsz != 20 || data->n_namesz != 4 || data->n_type != NT_GNU_BUILD_ID)
+        return;
+
+    id = es->data + note->sh_offset + sizeof(Nhdr) + 4;
+    es->build_id = xcalloc(1, 2*20 + 1);
+    for (i = 0; i < 20; i++)
+        sprintf(es->build_id + (i*2), "%02x", id[i]);
+    _d("elf build id: %s\n", es->build_id);
 }
 
 static int read_symbols_table(struct elfsyms *es, const Shdr *symtab,
@@ -84,17 +102,20 @@ static int read_symbols(struct elfsyms *es)
     shstrtab = es->data + hdr->e_shoff + (hdr->e_shstrndx * hdr->e_shentsize);
     for (i = 0; i < hdr->e_shnum; i++) {
         const Shdr *shdr = es->data + hdr->e_shoff + (i * hdr->e_shentsize);
+        const char *sname = es->data + shstrtab->sh_offset + shdr->sh_name;
 
-        if (shdr->sh_type == SHT_DYNSYM)
+        if (shdr->sh_type == SHT_DYNSYM) {
             dynsym = shdr;
-        else if (shdr->sh_type == SHT_SYMTAB)
+        } else if (shdr->sh_type == SHT_SYMTAB) {
             symtab = shdr;
-        else if (shdr->sh_type == SHT_STRTAB) {
-            const char *sname = es->data + shstrtab->sh_offset + shdr->sh_name;
+        } else if (shdr->sh_type == SHT_STRTAB) {
             if (strcmp(sname, ".dynstr") == 0)
                 dynstr = shdr;
             else if (strcmp(sname, ".strtab") == 0)
                 strtab = shdr;
+        } else if (shdr->sh_type == SHT_NOTE) {
+            if (strcmp(sname, ".note.gnu.build-id") == 0)
+                read_build_id(es, shdr);
         }
     }
     

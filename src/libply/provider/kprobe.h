@@ -8,7 +8,6 @@
 #define _PLY_PROVIDER_KPROBE_H
 
 extern const struct func kprobe_regs_func;
-
-int kprobe_ir_pre(struct ply_probe *pb);
+extern const struct func kprobe_arg_func;
 
 #endif	/* _PLY_PROVIDER_KPROBE_H */

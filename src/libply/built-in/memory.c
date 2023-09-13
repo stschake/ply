@@ -140,7 +140,10 @@ static int str_ir_post(const struct func *func, struct node *n,
 	ir_emit_ldbp(pb->ir, BPF_REG_1, n->sym->irs.stack);
 	ir_emit_insn(ir, MOV_IMM((int32_t)type_sizeof(n->sym->type)), BPF_REG_2, 0);
 	ir_emit_sym_to_reg(ir, BPF_REG_3, ptr->sym);
-	ir_emit_insn(ir, CALL(BPF_FUNC_probe_read_kernel_str), 0, 0);
+	if (ptr->sym->irs.hint.user)
+		ir_emit_insn(ir, CALL(BPF_FUNC_probe_read_user_str), 0, 0);
+	else
+		ir_emit_insn(ir, CALL(BPF_FUNC_probe_read_kernel_str), 0, 0);
 	return 0;
 }
 
@@ -153,7 +156,7 @@ static int mem_ir_post(const struct func *func, struct node *n,
 	ir_init_sym(pb->ir, n->sym);
 
 	ir_emit_sym_to_reg(pb->ir, BPF_REG_3, ptr->sym);
-	ir_emit_read_to_sym(pb->ir, n->sym, BPF_REG_3);
+	ir_emit_read_to_sym(pb->ir, n->sym, BPF_REG_3, ptr->sym->irs.hint.user);
 	return 0;
 }
 
@@ -424,7 +427,7 @@ static int deref_ir_post(const struct func *func, struct node *n,
 		return 0;
 
 	ir_emit_sym_to_reg(pb->ir, BPF_REG_0, ptr->sym);
-	ir_emit_read_to_sym(pb->ir, n->sym, BPF_REG_0);
+	ir_emit_read_to_sym(pb->ir, n->sym, BPF_REG_0, ptr->sym->irs.hint.user);
 	return 0;
 }
 
@@ -603,7 +606,7 @@ static int map_ir_post(const struct func *func, struct node *n,
 	lhit  = ir_alloc_label(pb->ir);
 
 	ir_emit_insn(pb->ir, JMP_IMM(BPF_JEQ, 0, lmiss), BPF_REG_0, 0);
-	ir_emit_read_to_sym(pb->ir, n->sym, BPF_REG_0);
+	ir_emit_read_to_sym(pb->ir, n->sym, BPF_REG_0, 0);
 	ir_emit_insn(pb->ir, JMP_IMM(BPF_JA, 0, lhit), 0, 0);
 
 	ir_emit_label(pb->ir, lmiss);

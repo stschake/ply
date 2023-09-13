@@ -118,13 +118,6 @@ static const struct func kprobe_caller_func = {
 
 /* argN */
 
-static inline int is_arg(const char *name)
-{
-	return (strstr(name, "arg") == name)
-		&& (strlen(name) == 4)
-		&& (name[3] >= '0' && name[3] <= '9');
-}
-
 static int kprobe_arg_rewrite(const struct func *func, struct node *n,
 			      struct ply_probe *pb)
 {
@@ -152,7 +145,7 @@ static int kprobe_arg_rewrite(const struct func *func, struct node *n,
 	return 1;
 }
 
-static const struct func kprobe_arg_func = {
+const struct func kprobe_arg_func = {
 	.name = "argN",
 
 	/* for now, in the future we could read dwarf symbols to
@@ -177,7 +170,7 @@ static int kprobe_sym_alloc(struct ply_probe *pb, struct node *n)
 		} else if (!strcmp(n->expr.func, "caller")) {
 			func = &kprobe_caller_func;
 			n->expr.ident = 1;
-		} else if (is_arg(n->expr.func)) {
+		} else if (is_arg_identifier(n->expr.func)) {
 			func = &kprobe_arg_func;
 		}
 		break;

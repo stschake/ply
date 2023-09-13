@@ -42,7 +42,7 @@ static int kretprobe_retval_rewrite(const struct func *func, struct node *n,
 	return 1;
 }
 
-static const struct func kretprobe_retval_func = {
+const struct func kretprobe_retval_func = {
 	.name = "retval",
 
 	/* for now, in the future we could read dwarf symbols to

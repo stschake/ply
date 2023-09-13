@@ -8,6 +8,7 @@
 #define _PLY_UTILS_H
 
 #include <assert.h>
+#include <string.h>
 
 int strtonum(const char *_str, int64_t *s64, uint64_t *u64);
 int isstring(const char *data, size_t len);
@@ -69,6 +70,13 @@ static inline void *xcalloc(size_t nmemb, size_t size)
 
 	assert(mem);
 	return mem;
+}
+
+static inline int is_arg_identifier(const char *name)
+{
+	return (strstr(name, "arg") == name)
+		&& (strlen(name) == 4)
+		&& (name[3] >= '0' && name[3] <= '9');
 }
 
 #ifndef HAVE_QSORT_R

@@ -19,42 +19,6 @@ struct uprobe {
 	struct elfsyms *es;
 };
 
-static struct tfield f_1arg[] = {
-	{ .type = &t_void },
-	{ .type = NULL }
-};
-
-struct type t_uptr_func = {
-	.ttype = T_FUNC,
-	.func = { .type = &t_void, .args = f_1arg },
-};
-
-static int uptr_ir_post(const struct func *func, struct node *n,
-		       struct ply_probe *pb)
-{
-	struct node *child = n->expr.args;
-
-	ir_init_sym(pb->ir, n->sym);
-	ir_emit_sym_to_sym(pb->ir, n->sym, child->sym);
-    n->sym->irs.hint.user = 1;
-	return 0;
-}
-
-static int uptr_type_infer(const struct func *func, struct node *n)
-{
-    struct node *arg = n->expr.args;
-
-    n->sym->type = arg->sym->type;
-    return 0;
-}
-
-struct func uprobe_uptr_func = {
-	.name = "uptr",
-	.type = &t_uptr_func,
-	.type_infer = uptr_type_infer,
-	.ir_post = uptr_ir_post,
-};
-
 static int uprobe_sym_alloc(struct ply_probe *pb, struct node *n)
 {
     const struct func *func = NULL;
@@ -66,8 +30,6 @@ static int uprobe_sym_alloc(struct ply_probe *pb, struct node *n)
         } else if (!strcmp(n->expr.func, "regs")) {
             func = &kprobe_regs_func;
             n->expr.ident = 1;
-        } else if (!strcmp(n->expr.func, "uptr")) {
-            func = &uprobe_uptr_func;
         }
     }
 

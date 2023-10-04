@@ -206,6 +206,37 @@ static struct tfield f_1arg[] = {
 	{ .type = NULL }
 };
 
+struct type t_uptr_func = {
+	.ttype = T_FUNC,
+	.func = { .type = &t_void, .args = f_1arg },
+};
+
+static int uptr_ir_post(const struct func *func, struct node *n,
+		       struct ply_probe *pb)
+{
+	struct node *child = n->expr.args;
+
+	ir_init_sym(pb->ir, n->sym);
+	ir_emit_sym_to_sym(pb->ir, n->sym, child->sym);
+    n->sym->irs.hint.user = 1;
+	return 0;
+}
+
+static int uptr_type_infer(const struct func *func, struct node *n)
+{
+    struct node *arg = n->expr.args;
+
+    n->sym->type = arg->sym->type;
+    return 0;
+}
+
+static struct func uptr_func = {
+	.name = "uptr",
+	.type = &t_uptr_func,
+	.type_infer = uptr_type_infer,
+	.ir_post = uptr_ir_post,
+};
+
 struct type t_mem_func = {
 	.ttype = T_FUNC,
 	.func = { .type = &t_void, .args = f_1arg, .vargs = 1 },
@@ -960,4 +991,5 @@ void memory_init(void)
 	built_in_register(&agg_func);
 	built_in_register(&delete_func);
 	built_in_register(&clear_func);
+	built_in_register(&uptr_func);
 }

@@ -19,8 +19,6 @@ static int uretprobe_sym_alloc(struct ply_probe *pb, struct node *n)
         } else if (!strcmp(n->expr.func, "regs")) {
             func = &kprobe_regs_func;
             n->expr.ident = 1;
-        } else if (!strcmp(n->expr.func, "uptr")) {
-            func = &uprobe_uptr_func;
         } else if (!strcmp(n->expr.func, "retval")) {
             func = &kretprobe_retval_func;
             n->expr.ident = 1;

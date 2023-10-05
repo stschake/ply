@@ -1,0 +1,8 @@
+
+make && sudo ./src/ply/ply -d 'uretprobe:/bin/bash:readline { print(str(uptr(retval))); }'
+
+
+make && sudo ./src/ply/ply -d 'uprobe:/home/stefan/wget/src/wget:gethttp { print(stack); }'
+
+
+make && sudo ./src/ply/ply -d 'kprobe:do_sys_open { printf("%v(%v): %s\n", comm, uid, str(uptr(arg1))); }'
